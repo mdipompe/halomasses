@@ -36,7 +36,7 @@
 ;-
 FUNCTION bias2mhalo, bias, redshift, bias_err=bias_err, $
                      h0=h0, omega_m=omega_m, omega_b=omega_b, $
-                     omega_l=omega_l, sigma_8=sigma_8, $
+                     omega_l=omega_l, sigma_8=sigma_8, spec_ind=spec_ind,$
                      model=model,weights=weights
 
 ;MAD Set default cosmology

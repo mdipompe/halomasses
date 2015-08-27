@@ -57,39 +57,19 @@ IF ~keyword_set(model) THEN model='tinker10'
 IF (model NE 'tinker10' AND model NE 'tinker05' AND model NE 'smt') THEN BEGIN
    print,'MHALO2BIAS: Unsupported model supplied.'
    print,'            Options are ''tinker10'', ''tinker05'', or ''smt'''
-   print,'            Returning ''-1'' and quitting.
+   print,'            Returning ''-1'' and quitting.'
    return,'-1'
 ENDIF
 
 ;MAD Set Hubble parameter scaling E(z)
 E_z=sqrt((omega_m*(1.+redshift)^3.) + omega_l)
 
-;MAD Scale omega_m, omega_l with z
+;MAD Scale omega_m with z
 omega_m_z=omega_m*((1.+redshift)^3.)/(E_z^2.)
-omega_l_z=omega_l/(E_z^2.)
 
-;MAD Get growth factor (using Carroll et al. 1992 approx, 
-;MAD accurate to ~1%.  Better than we know halo mass and bias usually)
-;MAD Normalized to 1 at z=0
-gz=(5./2.)*(omega_m_z/((omega_m_z^(4./7.))-omega_l_z+$
-   (1.+(omega_m_z/2.))*(1.+(omega_l_z/70.))))
-g0=(5./2.)*(omega_m/((omega_m^(4./7.))-omega_l+$
-   (1.+(omega_m/2.))*(1.+(omega_l/70.))))
-D_z=(gz/g0)/(1.+redshift)
-
-;MAD Get sigma(M) (van den Bosch 2002, good within 0.005 
-;MAD for 10^6 < M < 10^16)
-gamma=omega_m*h0*EXP((-1.)*omega_b*(1.+(SQRT(2.*h0)/omega_m)))
-c=3.804d-4
-x=(c*gamma*((10^(log_mhalo/3.))))/((omega_m)^(1./3.))
-g1=64.087*((1.+1.074*(x^(0.3))-1.581*(x^(0.4))+0.954*(x^(0.5))-0.185*(x^(0.6)))^(-10.))
-x=(32.*gamma)
-g2=64.087*((1.+1.074*(x^(0.3))-1.581*(x^(0.4))+0.954*(x^(0.5))-0.185*(x^(0.6)))^(-10.))
-f=(g1^2.)/(g2^2.)
-s0=SQRT(f*(sigma_8^2.))
-;MAD Tweak for non-unity spectral index
-s0=s0*(10^((log_mhalo-14.09)*(1.00-spec_ind)/9.2))/(1.+(1.00-spec_ind)/9.2)
-sigma_m=s0*D_z
+;MAD Get sigma(M)
+sigma_m=sigma_m(log_mhalo,redshift,h0=h0,omega_m=omega_m,omega_b=omega_b,$
+                omega_l=omega_l,sigma_8=sigma_8,spec_ind=spec_ind)
 
 
 ;MAD Use approximation of NFW 97 for delta (valid in universe with
