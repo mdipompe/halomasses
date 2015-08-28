@@ -1,3 +1,36 @@
+;+
+;  NAME:
+;    halo_mass_function
+;  PURPOSE:
+;    Get N(M) for a halo mass (or masses)
+;
+;  USE:
+;    res=halo_mass_function
+;
+;  INPUT:
+;    log_mhalo - Log of the halo mass(es) (in M_sun/h). 
+;    redshift - redshift.
+;
+;  OPTIONAL INPUT:
+;    h0 - little h (H_0/100). Defaults to 0.702
+;    omega_m - omega_matter.  Defaults to 0.275
+;    omega_l - omega_lambda. Defaults to 0.725
+;    omega_b - omega_baryon. Defaults to 0.046
+;    spec_ind - power spectrum spectral index.  Defaults to 0.968
+;    model - mass function model.  Options are:
+;            'tinker10' (Tinker et al. 2010)  Default
+;            'tinker08' (Tinker et al. 2008)
+;            'smt' (Sheth, Mo, & Turman 2001)
+;
+;  OUTPUT:
+;    Normalized N(M)
+;
+;  NOTES:
+;    Hacked from codes by Ryan Hickox
+;
+;  HISTORY:
+;    8-26-15 - Written - MAD (UWyo)
+;-
 FUNCTION halo_mass_function, log_mhalo, redshift,$
                              h0=h0, omega_m=omega_m, omega_b=omega_b, $
                              omega_l=omega_l, $
@@ -67,6 +100,18 @@ IF (model EQ 'tinker08') THEN BEGIN
    
    f=term1*term2*term3/nu
 ENDIF
+IF (model EQ 'smt') THEN BEGIN
+   A=0.3222
+   q=0.3
+   
+   term1=(2.*A)/nu
+   term2=(1.+(1./(nu^(2.*q))))
+   term3=((nu^2.)/(2.*!dpi))^(1./2.)
+   term4=EXP((-1.)*(nu^2.)/2.)
+
+   f=term1*term2*term3*term4
+ENDIF
+
 
 ;MAD Get N(M) in physical units
 rho_crit=2.7745d11
