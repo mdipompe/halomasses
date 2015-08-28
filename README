@@ -1,6 +1,10 @@
-Main purpose is to convert bias to halo mass under some collapse model.
+Main purpose is to convert bias to halo mass and vice versa
+under some collapse model.
+
 Current model choices are Tinker et al. (2010; 'tinker10'), Tinker et al.
 (2005; 'tinker05'), and Sheth, Mo & Turman (2001; 'smt').
 
-Pretty much everything is done in mhalo2bias.pro, which is called from
-bias2mhalo.pro, and the results are interpolated to your desired bias.
+You can supply your own power spectrum to calculate the RMS mass fluctiations
+(sigma(M)) for a given mass, or have the code call CAMB and get 
+a power spectrum for you.  This relies on CAMB4IDL wrapper (see mdipompe on
+ GitHub)

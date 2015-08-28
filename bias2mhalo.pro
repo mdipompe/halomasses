@@ -18,7 +18,6 @@
 ;    omega_m - omega_matter.  Defaults to 0.275
 ;    omega_l - omega_lambda. Defaults to 0.725
 ;    omega_b - omega_baryon. Defaults to 0.046
-;    sigma_8 - power spectrum normalization sigma8.  Defaults to 0.81
 ;    spec_ind - power spectrum spectral index.  Defaults to 0.968
 ;    model - halo collapse model.  Options are:
 ;            'tinker10' (Tinker et al. 2010)  Default
@@ -29,14 +28,14 @@
 ;    Array containing mhalo, upper mhalo error, lower mhalo error.
 ;
 ;  NOTES:
-;    Hacked from codes by Ryan Hickox
+;    Partially hacked from codes by Ryan Hickox
 ;
 ;  HISTORY:
 ;    8-26-15 - Written - MAD (UWyo)
 ;-
 FUNCTION bias2mhalo, bias, redshift, bias_err=bias_err, $
                      h0=h0, omega_m=omega_m, omega_b=omega_b, $
-                     omega_l=omega_l, sigma_8=sigma_8, spec_ind=spec_ind,$
+                     omega_l=omega_l, spec_ind=spec_ind,$
                      model=model,weights=weights
 
 ;MAD Set default cosmology
@@ -44,7 +43,6 @@ IF ~keyword_set(h0) THEN h0=0.702
 IF ~keyword_set(omega_m) THEN omega_m=0.275
 IF ~keyword_set(omega_b) THEN omega_b=0.046
 IF ~keyword_set(omega_l) THEN omega_l=0.725
-IF ~keyword_set(sigma_8) THEN sigma_8=0.81
 IF ~keyword_set(spec_ind) THEN spec_ind=0.968
 
 ;MAD Default model is Tinker et al. (2010)
@@ -55,7 +53,7 @@ IF ~keyword_set(bias_err) THEN bias_err=0.
 
 ;MAD Generate array of log(mhalo) to test/interpolate
 ;MAD (from 6 to 16, where sigma(M) best estimated)
-masses=6.+findgen(10000)*(0.001)
+masses=6.+findgen(1000)*(0.01)
 
 ;MAD Loop over z
 FOR i=0L,n_elements(redshift)-1 DO BEGIN
@@ -63,7 +61,7 @@ FOR i=0L,n_elements(redshift)-1 DO BEGIN
    biases=mhalo2bias(masses, redshift[i],$
                      h0=h0, omega_m=omega_m, $
                      omega_b=omega_b, omega_l=omega_l, $
-                     sigma_8=sigma_8, spec_ind=spec_ind, $
+                     spec_ind=spec_ind, $
                      model=model)
    
    ;MAD Interpolate to desired bias

@@ -2,14 +2,15 @@
 ;  NAME:
 ;    mhalo2bias
 ;  PURPOSE:
-;    Calculate bias for a given DM halo mass
+;    Calculate bias for a given DM halo mass and z.  Can do an array
+;    of halo masses OR redshifts, but not both at once.
 ;
 ;  USE:
 ;    bias=mhalo2bias(log_mhalo,z,h0=h0,omega_m=...,model='tinker10')
 ;
 ;  INPUT:
 ;    log_mhalo - Log of the halo mass(es) (in M_sun/h).  Cannot be an
-;                array if redshift is
+;                array if redshift is.
 ;    redshift - redshift(s).  Cannot be an array if log_mhalo is.
 ;
 ;  OPTIONAL INPUT:
@@ -17,7 +18,6 @@
 ;    omega_m - omega_matter.  Defaults to 0.275
 ;    omega_l - omega_lambda. Defaults to 0.725
 ;    omega_b - omega_baryon. Defaults to 0.046
-;    sigma_8 - power spectrum normalization sigma8.  Defaults to 0.81
 ;    spec_ind - power spectrum spectral index.  Defaults to 0.968
 ;    model - halo collapse model.  Options are:
 ;            'tinker10' (Tinker et al. 2010)  Default
@@ -35,7 +35,7 @@
 ;-
 FUNCTION mhalo2bias, log_mhalo, redshift,$
                      h0=h0, omega_m=omega_m, omega_b=omega_b, $
-                     omega_l=omega_l, sigma_8=sigma_8, spec_ind=spec_ind, $
+                     omega_l=omega_l, spec_ind=spec_ind, $
                      model=model
 
 IF (n_elements(log_mhalo) GT 1 AND n_elements(redshift) GT 1) THEN BEGIN
@@ -48,7 +48,6 @@ IF ~keyword_set(h0) THEN h0=0.702
 IF ~keyword_set(omega_m) THEN omega_m=0.275
 IF ~keyword_set(omega_b) THEN omega_b=0.046
 IF ~keyword_set(omega_l) THEN omega_l=0.725
-IF ~keyword_set(sigma_8) THEN sigma_8=0.81
 IF ~keyword_set(spec_ind) THEN spec_ind=0.968
 
 ;MAD Default model is Tinker et al. (2010)
@@ -68,15 +67,22 @@ E_z=sqrt((omega_m*(1.+redshift)^3.) + omega_l)
 omega_m_z=omega_m*((1.+redshift)^3.)/(E_z^2.)
 
 ;MAD Get sigma(M)
-sigma_m=sigma_m(log_mhalo,redshift,h0=h0,omega_m=omega_m,omega_b=omega_b,$
-                omega_l=omega_l,sigma_8=sigma_8,spec_ind=spec_ind)
-
+IF (n_elements(redshift) EQ 1) THEN BEGIN
+   sig_m=sigma_m(log_mhalo,redshift,h0=h0,omega_m=omega_m,omega_b=omega_b,$
+                 omega_l=omega_l,spec_ind=spec_ind)
+ENDIF ELSE BEGIN
+   sig_m=sigma_m(log_mhalo,0.,h0=h0,omega_m=omega_m,omega_b=omega_b,$
+                 omega_l=omega_l,spec_ind=spec_ind)
+   sig_m=sig_m[0]*growth_factor(redshift)
+   print,'MHALO2BIAS: Given array of z.  Calculating sigma_M(z=0) and'
+   print,'            multiplying by growth factor for each z.'
+ENDELSE
 
 ;MAD Use approximation of NFW 97 for delta (valid in universe with
 ;MAD Lambda, while Tinker delta_c=1.69 only for Omega_m=1)
 delta_c=0.15*((12.*!dpi)^(2./3.))*((omega_m_z)^(0.0055))	
 
-nu=delta_c/sigma_m
+nu=delta_c/sig_m
 
 IF (model EQ 'tinker10') THEN BEGIN
    print,'MHALO2BIAS: Using Tinker et al. (2010) model...'
