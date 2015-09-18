@@ -26,7 +26,7 @@
 ;    power_spec - string name of file containing matter power spectrum.
 ;
 ;  OUTPUT:
-;    Array containing mhalo, lower mhalo error, upper mhalo error.
+;    Array containing mhalo, upper mhalo error, lower mhalo error.
 ;
 ;  NOTES:
 ;    Partially hacked from codes by Ryan Hickox
