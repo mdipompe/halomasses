@@ -28,6 +28,10 @@
 ;                 make one.  If doing an array of z, should supply the
 ;                 matter power spectrum at z=0.
 ;
+;  OPTIONAL KEYWORDS:
+;    use_gf - just get power spectrum at z=0 and use the growth factor
+;             to rescale it.
+;
 ;  OUTPUT:
 ;    bias (array corresponding to z array or Mhalo array if supplied)    
 ;
@@ -41,7 +45,7 @@
 FUNCTION mhalo2bias, log_mhalo, redshift,$
                      h0=h0, omega_m=omega_m, omega_b=omega_b, $
                      omega_l=omega_l, spec_ind=spec_ind, $
-                     model=model,power_spec=power_spec
+                     model=model,power_spec=power_spec,use_gf=use_gf
 
 IF (n_elements(log_mhalo) GT 1 AND n_elements(redshift) GT 1) THEN BEGIN
    print,'MHALO2BIAS: You can''t supply an array of redshifts AND halo masses. I quit...'
@@ -72,16 +76,22 @@ E_z=sqrt((omega_m*(1.+redshift)^3.) + omega_l)
 omega_m_z=omega_m*((1.+redshift)^3.)/(E_z^2.)
 
 ;MAD Get sigma(M)
-IF (n_elements(redshift) EQ 1) THEN BEGIN
+IF (n_elements(redshift) EQ 1 AND ~keyword_set(use_gf)) THEN BEGIN
    sig_m=sigma_m(log_mhalo,redshift,h0=h0,omega_m=omega_m,omega_b=omega_b,$
                  omega_l=omega_l,spec_ind=spec_ind,power_spec=power_spec)
-ENDIF ELSE BEGIN
+ENDIF
+IF (n_elements(redshift) GT 1) THEN BEGIN
    sig_m=sigma_m(log_mhalo,0.,h0=h0,omega_m=omega_m,omega_b=omega_b,$
                  omega_l=omega_l,spec_ind=spec_ind,power_spec=power_spec)
    sig_m=sig_m[0]*growth_factor(redshift)
    print,'MHALO2BIAS: Given array of z.  Calculating sigma_M(z=0) and'
    print,'            multiplying by growth factor for each z.'
-ENDELSE
+ENDIF
+IF (n_elements(redshift) EQ 1 AND keyword_set(use_gf)) THEN BEGIN
+   sig_m=sigma_m(log_mhalo,0.,h0=h0,omega_m=omega_m,omega_b=omega_b,$
+                 omega_l=omega_l,spec_ind=spec_ind,power_spec=power_spec)
+   sig_m=sig_m*growth_factor(redshift)
+ENDIF
 
 ;MAD Use approximation of NFW 97 for delta (valid in universe with
 ;MAD Lambda, while Tinker delta_c=1.69 only for Omega_m=1)
