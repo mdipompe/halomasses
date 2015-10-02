@@ -21,6 +21,8 @@
 ;            'tinker10' (Tinker et al. 2010)  Default
 ;            'tinker08' (Tinker et al. 2008)
 ;            'smt' (Sheth, Mo, & Turman 2001)
+;    power_spec - filename of matter power spectrum (gets with CAMB
+;                 if not supplied)
 ;
 ;  OUTPUT:
 ;    Normalized N(M)
@@ -35,7 +37,7 @@ FUNCTION halo_mass_function, log_mhalo, redshift,$
                              h0=h0, omega_m=omega_m, omega_b=omega_b, $
                              omega_l=omega_l, $
                              spec_ind=spec_ind, $
-                             model=model
+                             model=model,power_spec=power_spec
 
 IF (n_elements(redshift) GT 1) THEN BEGIN
    print,'HALO_MASS FUNCTION: One redshift at a time please!'
@@ -58,7 +60,7 @@ omega_m_z=omega_m*((1.+redshift)^3.)/(E_z^2.)
 
 ;MAD Get sigma_m
 sig_m=sigma_m(log_mhalo,redshift,h0=h0,omega_m=omega_m,omega_b=omega_b,$
-                 omega_l=omega_l,spec_ind=spec_ind)
+                 omega_l=omega_l,spec_ind=spec_ind,power_spec=power_spec)
 
 ;MAD Use approximation of NFW 97 for delta (valid in universe with
 ;MAD Lambda, while Tinker delta_c=1.69 only for Omega_m=1)
@@ -103,11 +105,14 @@ ENDIF
 IF (model EQ 'smt') THEN BEGIN
    A=0.3222
    q=0.3
+   smalla=0.707
+   
+   nuprime=sqrt(smalla)*nu
    
    term1=(2.*A)/nu
-   term2=(1.+(1./(nu^(2.*q))))
-   term3=((nu^2.)/(2.*!dpi))^(1./2.)
-   term4=EXP((-1.)*(nu^2.)/2.)
+   term2=(1.+(1./(nuprime^(2.*q))))
+   term3=((nuprime^2.)/(2.*!dpi))^(1./2.)
+   term4=EXP((-1.)*(nuprime^2.)/2.)
 
    f=term1*term2*term3*term4
 ENDIF
@@ -115,12 +120,12 @@ ENDIF
 
 ;MAD Get N(M) in physical units
 rho_crit=2.7745d11
-rho_matter=rho_crit
+rho_matter=rho_crit*omega_m
 
 mhalo=10.^(log_mhalo)
    
 d_sig_M=sigma_m(log_mhalo+0.001,redshift,h0=h0,omega_m=omega_m,omega_b=omega_b,$
-                 omega_l=omega_l,spec_ind=spec_ind)
+                 omega_l=omega_l,spec_ind=spec_ind,power_spec=power_spec)
 d_lognu=ALOG10(delta_c/d_sig_M)-ALOG10(nu)
 dlognu_dlogM=d_lognu/0.001
 
