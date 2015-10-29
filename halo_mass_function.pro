@@ -23,6 +23,9 @@
 ;            'smt' (Sheth, Mo, & Turman 2001)
 ;    power_spec - filename of matter power spectrum (gets with CAMB
 ;                 if not supplied)
+;    Delta - Overdensity (relative to mean background) cut used to
+;            define halo mass. Setting only works for Tinker et
+;            al. (2008, 2010) models.  Defaults to 200.
 ;
 ;  OUTPUT:
 ;    Normalized N(M)
@@ -32,12 +35,14 @@
 ;
 ;  HISTORY:
 ;    8-26-15 - Written - MAD (UWyo)
+;   10-29-15 - Added Delta keyword - MAD (Dartmouth)
 ;-
 FUNCTION halo_mass_function, log_mhalo, redshift,$
                              h0=h0, omega_m=omega_m, omega_b=omega_b, $
                              omega_l=omega_l, $
                              spec_ind=spec_ind, $
-                             model=model,power_spec=power_spec
+                             model=model,power_spec=power_spec,$
+                             Delta=Delta
 
 IF (n_elements(redshift) GT 1) THEN BEGIN
    print,'HALO_MASS FUNCTION: One redshift at a time please!'
@@ -51,6 +56,7 @@ IF ~keyword_set(omega_b) THEN omega_b=0.046
 IF ~keyword_set(omega_l) THEN omega_l=0.725
 IF ~keyword_set(spec_ind) THEN spec_ind=0.968
 IF ~keyword_set(model) THEN model='tinker10'
+IF ~keyword_set(Delta) THEN Delta=200.
 
 ;MAD Set Hubble parameter scaling E(z)
 E_z=sqrt((omega_m*(1.+redshift)^3.) + omega_l)
@@ -69,13 +75,19 @@ delta_c=0.15*((12.*!dpi)^(2./3.))*((omega_m_z)^(0.0055))
 nu=delta_c/sig_m
 
 IF (model EQ 'tinker10') THEN BEGIN
-   ;MAD For delta=200
-   alpha=0.368
-   beta=0.589
-   gam=0.864
-   phi=-0.729
-   eta=-0.243
-
+   ;MAD Find fit params for Delta (interpolate Tinker et al. (2010) Table 4)
+   Deltas=[200.,300.,400.,600.,800.,1200.,1600.,2400.,3200.]
+   alphas=[0.368,0.363,0.385,0.389,0.393,0.365,0.379,0.355,0.327]
+   betas=[0.589,0.585,0.544,0.543,0.564,0.623,0.637,0.673,0.702]
+   gams=[0.864,0.922,0.987,1.09,1.20,1.34,1.50,1.68,1.81]
+   phis=[-0.729,-0.789,-0.910,-1.05,-1.20,-1.26,-1.45,-1.50,-1.49]
+   etas=[-0.243,-0.261,-0.261,-0.273,-0.278,-0.301,-0.301,-0.319,-0.336]
+   quadterp,deltas,alphas,delta,alpha
+   quadterp,deltas,betas,delta,beta
+   quadterp,deltas,gams,delta,gam
+   quadterp,deltas,phis,delta,phi
+   quadterp,deltas,etas,delta,eta
+   
    term1=1+((beta*nu)^((-2)*phi))
    term2=nu^(2.*eta)
    term3=EXP(((-1.)*gam*(nu^2.))/2.)
@@ -83,8 +95,7 @@ IF (model EQ 'tinker10') THEN BEGIN
    f=alpha*term1*term2*term3
 ENDIF
 IF (model EQ 'tinker08') THEN BEGIN
-   delta=200
-   logalpha=-(0.75/alog10(delta/75))^1.2
+   logalpha=-(0.75/alog10(Delta/75))^1.2
    alpha=10.^logalpha
    
    abig0=0.186

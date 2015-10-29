@@ -25,7 +25,11 @@
 ;            'tinker10' (Tinker et al. 2010)  Default
 ;            'tinker05' (Tinker et al. 2005)
 ;            'smt' (Sheth, Mo, & Turman 2001)
-;    power_spec - string name of file containing matter power spectrum.
+;    power_spec - string name of file containing matter power
+;                 spectrum.
+;    Delta - Overdensity (relative to mean background) cut used to
+;            define halo mass.  Setting only works for Tinker et
+;            al. (2010) model. Defaults to 200.
 ;
 ;  OPTIONAL KEYWORDS
 ;    use_gf - use growth factor to scale sigma_m from z=0.  This is
@@ -40,12 +44,13 @@
 ;  HISTORY:
 ;    8-26-15 - Written - MAD (UWyo)
 ;    9-18-15 - Added power_spec input option - MAD (Dartmouth)
+;   10-29-15 - Added Delta keyword - MAD (Dartmouth)
 ;-
 FUNCTION bias2mhalo, bias, zs, bias_err=bias_err, $
                      h0=h0, omega_m=omega_m, omega_b=omega_b, $
                      omega_l=omega_l, spec_ind=spec_ind,$
                      model=model,weights=weights,power_spec=power_spec, $
-                     use_gf=use_gf
+                     use_gf=use_gf, Delta=Delta
 
 ;MAD Set default cosmology
 IF ~keyword_set(h0) THEN h0=0.702
@@ -62,8 +67,9 @@ IF keyword_set(weights) THEN BEGIN
    ENDIF
 ENDIF
    
-;MAD Default model is Tinker et al. (2010)
+;MAD Default model is Tinker et al. (2010) with Delta=200.
 IF ~keyword_set(model) THEN model='tinker10'
+IF ~keyword_set(Delta) THEN Delta=200.
 
 ;MAD Set errors to 0 if needed
 IF ~keyword_set(bias_err) THEN bias_err=0.
@@ -80,7 +86,7 @@ FOR i=0L,n_elements(zs)-1 DO BEGIN
                         h0=h0, omega_m=omega_m, $
                         omega_b=omega_b, omega_l=omega_l, $
                         spec_ind=spec_ind, $
-                        model=model,power_spec=power_spec,use_gf=use_gf)
+                        model=model,power_spec=power_spec,use_gf=use_gf,Delta=Delta)
    ENDIF ELSE BEGIN
       biases=mhalo2bias(masses, zs[i],$
                         h0=h0, omega_m=omega_m, $

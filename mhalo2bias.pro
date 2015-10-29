@@ -27,6 +27,9 @@
 ;                 spectrum.  If not provided, will call CAMB4IDL and
 ;                 make one.  If doing an array of z, should supply the
 ;                 matter power spectrum at z=0.
+;    Delta - Overdensity (relative to mean background) cut used to
+;            define halo mass. Setting only works for Tinker et
+;            al. (2010) model.  Defaults to 200.
 ;
 ;  OPTIONAL KEYWORDS:
 ;    use_gf - just get power spectrum at z=0 and use the growth factor
@@ -41,11 +44,13 @@
 ;  HISTORY:
 ;    8-26-15 - Written - MAD (UWyo)
 ;    9-18-15 - Added power_spec input option - MAD (Dartmouth)
+;   10-29-15 - Added Delta keyword - MAD (Dartmouth)
 ;-
 FUNCTION mhalo2bias, log_mhalo, redshift,$
                      h0=h0, omega_m=omega_m, omega_b=omega_b, $
                      omega_l=omega_l, spec_ind=spec_ind, $
-                     model=model,power_spec=power_spec,use_gf=use_gf
+                     model=model,power_spec=power_spec,use_gf=use_gf,$
+                     Delta=Delta
 
 IF (n_elements(log_mhalo) GT 1 AND n_elements(redshift) GT 1) THEN BEGIN
    print,'MHALO2BIAS: You can''t supply an array of redshifts AND halo masses. I quit...'
@@ -101,8 +106,9 @@ nu=delta_c/sig_m
 
 IF (model EQ 'tinker10') THEN BEGIN
    print,'MHALO2BIAS: Using Tinker et al. (2010) model...'
-   ;MAD Assume delta=200
-   y=ALOG10(200.)
+   ;MAD Set default Delta
+   IF ~keyword_set(Delta) THEN Delta=200.
+   y=ALOG10(Delta)
    Abig=1.+0.24*y*exp(-(4/y)^4.)
    asmall=0.44*y-0.88
    Bbig=0.183
