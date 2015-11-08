@@ -115,19 +115,19 @@ ENDFOR
 
 ;MAD Check integral accuracy by normalizing to known sigma_8, then
 ;MAD integrating and seeing if you get that value back.
-IF keyword_set(check_acc) THEN BEGIN
-   sigma_8=0.8
-   Rf=8.
-   WHat=(3./((newk*Rf)^3.))*(SIN(newk*Rf)-((newk*Rf)*COS(newk*Rf)))
-   integ=((newpk^2.)*newk)*(WHat^2.)*(newk^2.)
-   res1=((1./(2.*(!dpi^2.)))*int_tabulated(newk,integ,/double))^(1./2.)
-   correc=((sigma_8)/res1)^2.
-   integ=(correc*(newpk^2.)*newk)*(WHat^2.)*(newk^2.)
-   res2=((1./(2.*(!dpi^2.)))*int_tabulated(newk,integ,/double))^(1./2.)
-   acc=100.*((res2-(sigma_8))/(sigma_8))
-   print,'SIGMA_8: Power spectrum integration accurate to'
-   print,'        ' + strtrim(abs(acc),2) + '%'
-ENDIF
+;IF keyword_set(check_acc) THEN BEGIN
+;   sigma_8=0.8
+;   Rf=8.
+;   WHat=(3./((newk*Rf)^3.))*(SIN(newk*Rf)-((newk*Rf)*COS(newk*Rf)))
+;   integ=((newpk^2.)*newk)*(WHat^2.)*(newk^2.)
+;   res1=((1./(2.*(!dpi^2.)))*int_tabulated(newk,integ,/double))^(1./2.)
+;   correc=((sigma_8)/res1)^2.
+;   integ=(correc*(newpk^2.)*newk)*(WHat^2.)*(newk^2.)
+;   res2=((1./(2.*(!dpi^2.)))*int_tabulated(newk,integ,/double))^(1./2.)
+;   acc=100.*((res2-(sigma_8))/(sigma_8))
+;   print,'SIGMA_8: Power spectrum integration accurate to'
+;   print,'        ' + strtrim(abs(acc),2) + '%'
+;ENDIF
 
 return,sigm
 END
