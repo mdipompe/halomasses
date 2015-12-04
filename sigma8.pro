@@ -33,7 +33,7 @@ IF (check EQ 4 OR check EQ 5) THEN BEGIN
    wavenum=power_spec[0,*]
    pk=power_spec[1,*]
 ENDIF ELSE IF (check EQ 7) THEN BEGIN
-   readcol,power_spec,wavenums,pspec,format='D'
+   readcol,power_spec,wavenum,pk,format='D'
 ENDIF ELSE BEGIN
    print,'SIGMA8: I don''t understand your power spectrum input'
    return,'-1'

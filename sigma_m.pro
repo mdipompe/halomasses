@@ -21,7 +21,7 @@
 ;    omega_m - omega_matter.  Defaults to 0.275
 ;    omega_l - omega_lambda. Defaults to 0.725
 ;    omega_b - omega_baryon. Defaults to 0.046
-;    spec_ind - power spectrum spectral index.  Defaults to 0.968
+;    spec_ind - power spectrum spectral index.  Defaults to 0.96
 ;    power_spec - string name of file with power spectrum.  Two
 ;                 columns, k (h/Mpc) and P(k) (h^-3 Mpc^3).
 ;                 If not supplied, runs camb with CAMB4IDL to get it.

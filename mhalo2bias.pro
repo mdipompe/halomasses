@@ -18,7 +18,7 @@
 ;    omega_m - omega_matter.  Defaults to 0.275
 ;    omega_l - omega_lambda. Defaults to 0.725
 ;    omega_b - omega_baryon. Defaults to 0.046
-;    spec_ind - power spectrum spectral index.  Defaults to 0.968
+;    spec_ind - power spectrum spectral index.  Defaults to 0.96
 ;    model - halo collapse model.  Options are:
 ;            'tinker10' (Tinker et al. 2010)  Default
 ;            'tinker05' (Tinker et al. 2005)
@@ -62,7 +62,7 @@ IF ~keyword_set(h0) THEN h0=0.702
 IF ~keyword_set(omega_m) THEN omega_m=0.275
 IF ~keyword_set(omega_b) THEN omega_b=0.046
 IF ~keyword_set(omega_l) THEN omega_l=0.725
-IF ~keyword_set(spec_ind) THEN spec_ind=0.968
+IF ~keyword_set(spec_ind) THEN spec_ind=0.96
 
 ;MAD Default model is Tinker et al. (2010)
 IF ~keyword_set(model) THEN model='tinker10'
