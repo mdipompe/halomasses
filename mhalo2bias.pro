@@ -34,6 +34,7 @@
 ;  OPTIONAL KEYWORDS:
 ;    use_gf - just get power spectrum at z=0 and use the growth factor
 ;             to rescale it.
+;    silent - don't print anything (except errors)
 ;
 ;  OUTPUT:
 ;    bias (array corresponding to z array or Mhalo array if supplied)    
@@ -50,7 +51,7 @@ FUNCTION mhalo2bias, log_mhalo, redshift,$
                      h0=h0, omega_m=omega_m, omega_b=omega_b, $
                      omega_l=omega_l, spec_ind=spec_ind, $
                      model=model,power_spec=power_spec,use_gf=use_gf,$
-                     Delta=Delta
+                     Delta=Delta,silent=silent
 
 IF (n_elements(log_mhalo) GT 1 AND n_elements(redshift) GT 1) THEN BEGIN
    print,'MHALO2BIAS: You can''t supply an array of redshifts AND halo masses. I quit...'
@@ -83,18 +84,20 @@ omega_m_z=omega_m*((1.+redshift)^3.)/(E_z^2.)
 ;MAD Get sigma(M)
 IF (n_elements(redshift) EQ 1 AND ~keyword_set(use_gf)) THEN BEGIN
    sig_m=sigma_m(log_mhalo,redshift,h0=h0,omega_m=omega_m,omega_b=omega_b,$
-                 omega_l=omega_l,spec_ind=spec_ind,power_spec=power_spec)
+                 omega_l=omega_l,spec_ind=spec_ind,power_spec=power_spec,silent=silent)
 ENDIF
 IF (n_elements(redshift) GT 1) THEN BEGIN
    sig_m=sigma_m(log_mhalo,0.,h0=h0,omega_m=omega_m,omega_b=omega_b,$
-                 omega_l=omega_l,spec_ind=spec_ind,power_spec=power_spec)
+                 omega_l=omega_l,spec_ind=spec_ind,power_spec=power_spec,silent=silent)
    sig_m=sig_m[0]*growth_factor(redshift)
-   print,'MHALO2BIAS: Given array of z.  Calculating sigma_M(z=0) and'
-   print,'            multiplying by growth factor for each z.'
+   IF ~keyword_set(silent) THEN BEGIN
+      print,'MHALO2BIAS: Given array of z.  Calculating sigma_M(z=0) and'
+      print,'            multiplying by growth factor for each z.'
+   ENDIF
 ENDIF
 IF (n_elements(redshift) EQ 1 AND keyword_set(use_gf)) THEN BEGIN
    sig_m=sigma_m(log_mhalo,0.,h0=h0,omega_m=omega_m,omega_b=omega_b,$
-                 omega_l=omega_l,spec_ind=spec_ind,power_spec=power_spec)
+                 omega_l=omega_l,spec_ind=spec_ind,power_spec=power_spec,silent=silent)
    sig_m=sig_m*growth_factor(redshift)
 ENDIF
 
@@ -105,7 +108,8 @@ delta_c=0.15*((12.*!dpi)^(2./3.))*((omega_m_z)^(0.0055))
 nu=delta_c/sig_m
 
 IF (model EQ 'tinker10') THEN BEGIN
-   print,'MHALO2BIAS: Using Tinker et al. (2010) model...'
+   IF ~keyword_set(silent) THEN $
+      print,'MHALO2BIAS: Using Tinker et al. (2010) model...'
    ;MAD Set default Delta
    IF ~keyword_set(Delta) THEN Delta=200.
    y=ALOG10(Delta)
@@ -123,13 +127,15 @@ IF (model EQ 'tinker10') THEN BEGIN
    bias=1.-term1+term2+term3
 ENDIF ELSE BEGIN
    IF (model EQ 'tinker05') THEN BEGIN
-      print,'MHALO2BIAS: Using Tinker et al. (2005) model...'
+      IF ~keyword_set(silent) THEN $
+         print,'MHALO2BIAS: Using Tinker et al. (2005) model...'
       a=0.707
       b=0.35
       c=0.80
    ENDIF
    IF (model EQ 'smt') THEN BEGIN
-      print,'MHALO2BIAS: Using Sheth, Mo, & Turman (2001) model...'
+      IF ~keyword_set(silent) THEN $
+         print,'MHALO2BIAS: Using Sheth, Mo, & Turman (2001) model...'
       a=0.707
       b=0.5
       c=0.6

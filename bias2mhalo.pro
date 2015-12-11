@@ -33,7 +33,9 @@
 ;
 ;  OPTIONAL KEYWORDS
 ;    use_gf - use growth factor to scale sigma_m from z=0.  This is
-;             done automatically if you supply more than one z to save time.
+;             done automatically if you supply more than one z to save
+;             time.
+;    silent - don't print anything
 ;
 ;  OUTPUT:
 ;    Array containing mhalo, lower mhalo error, upper mhalo error.
@@ -50,7 +52,7 @@ FUNCTION bias2mhalo, bias, zs, bias_err=bias_err, $
                      h0=h0, omega_m=omega_m, omega_b=omega_b, $
                      omega_l=omega_l, spec_ind=spec_ind,$
                      model=model,weights=weights,power_spec=power_spec, $
-                     use_gf=use_gf, Delta=Delta
+                     use_gf=use_gf, Delta=Delta,silent=silent
 
 ;MAD Set default cosmology
 IF ~keyword_set(h0) THEN h0=0.702
@@ -86,13 +88,13 @@ FOR i=0L,n_elements(zs)-1 DO BEGIN
                         h0=h0, omega_m=omega_m, $
                         omega_b=omega_b, omega_l=omega_l, $
                         spec_ind=spec_ind, $
-                        model=model,power_spec=power_spec,use_gf=use_gf,Delta=Delta)
+                        model=model,power_spec=power_spec,use_gf=use_gf,Delta=Delta,silent=silent)
    ENDIF ELSE BEGIN
       biases=mhalo2bias(masses, zs[i],$
                         h0=h0, omega_m=omega_m, $
                         omega_b=omega_b, omega_l=omega_l, $
                         spec_ind=spec_ind, $
-                        model=model,power_spec=power_spec,/use_gf)
+                        model=model,power_spec=power_spec,/use_gf,silent=silent)
    ENDELSE
 
    ;MAD Interpolate to desired bias

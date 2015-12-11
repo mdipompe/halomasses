@@ -30,8 +30,9 @@
 ;    paramfile - CAMB paramfile of defaults.  Cosmology and others
 ;                will be set in call below, but you might want to play
 ;                with others.  Defaults to default_params.ini.
-;    check_acc - will test the accuracy of P(k)dk integral. Prints
-;                percent accuracy to screen. (not well tested)
+;
+;  OPTIONAL KEYWORDS:
+;    silent - don't print anything (except errors)
 ;
 ;  OUTPUT:
 ;    sigma_M
@@ -46,7 +47,7 @@ FUNCTION sigma_m, log_mhalo, redshift, $
                   h0=h0, omega_m=omega_m, omega_b=omega_b, $
                   omega_l=omega_l, spec_ind=spec_ind,$
                   power_spec=power_spec,maxk=maxk,$
-                  paramfile=paramfile,check_acc=check_acc
+                  paramfile=paramfile,silent=silent
                   
 IF (n_elements(redshift) GT 1) THEN BEGIN
    print,'SIGMA_M: Currently only supports single redshifts...I quit'
@@ -86,9 +87,9 @@ IF ~keyword_set(power_spec) THEN BEGIN
                 omega_baryon=omega_b, $
                 omega_cdm=omega_m-omega_b, $
                 omega_lambda=omega_l)
-   readcol,'camb_'+mpfile,wavenum,pk,format='D,D'
+   readcol,'camb_'+mpfile,wavenum,pk,format='D,D',silent=silent
 ENDIF ELSE BEGIN
-   readcol,power_spec,wavenum,pk,format='D,D'
+   readcol,power_spec,wavenum,pk,format='D,D',silent=silent
 ENDELSE
 
 mhalo=10.^log_mhalo
