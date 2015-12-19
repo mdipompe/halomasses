@@ -7,7 +7,7 @@
 ;  USE:
 ;    lifetimes,log_mhalo,density,zrange,halodensity,lifetime,model='tinker10',$
 ;              h0=h0,omega_m=omega_m,omega_l=omega_l,omega_b=omega_b,$
-;              spec_ind=spec_ind
+;              spec_ind=spec_ind,power_spec=power_spec
 ;
 ;  INPUT:
 ;    log_mhalo - log halo mass of population
@@ -22,10 +22,14 @@
 ;    omega_l - omega_lambda. Defaults to 0.725
 ;    omega_b - omega_baryon. Defaults to 0.046
 ;    spec_ind - power spectrum spectral index.  Defaults to 0.968
+;    power_spec - text file with matter power spectrum
 ;    model - mass function model.  Options are:
 ;            'tinker10' (Tinker et al. 2010)  Default
 ;            'tinker08' (Tinker et al. 2008)
 ;            'smt' (Sheth, Mo, & Turman 2001)
+;
+;  OPTIONAL KEYWORDS:
+;    silent - dont print anything except for errors.
 ;
 ;  OUTPUT:
 ;    halodensity - the space density of halos with mhalo (Mpc^-3) (3
@@ -44,7 +48,8 @@ PRO lifetimes, log_mhalo, density, zrange, halodensity, lifetime, $
                h0=h0, omega_m=omega_m, omega_b=omega_b, $
                omega_l=omega_l, $
                spec_ind=spec_ind, $
-               model=model,power_spec=power_spec
+               model=model,power_spec=power_spec,$
+               silent=silent
 
 ;MAD Set default cosmology
 IF ~keyword_set(h0) THEN h0=0.702
@@ -66,7 +71,7 @@ testmhalo=findgen(200)/20+8
 testdense=(halo_mass_function(testmhalo,meanz,$
                               h0=h0,omega_m=omega_m,omega_b=omega_b,$
                               omega_l=omega_l,spec_ind=spec_ind,$
-                              model=model,power_spec=power_spec))*(10.^testmhalo)*ALOG(10)
+                              model=model,power_spec=power_spec,silent=silent))*(10.^testmhalo)*ALOG(10)
 
 ;MAD Interpolate to desired value/errors
 linterp,testmhalo,testdense,[log_mhalo-err_mhalo[0],log_mhalo,$

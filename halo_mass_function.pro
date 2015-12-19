@@ -27,6 +27,9 @@
 ;            define halo mass. Setting only works for Tinker et
 ;            al. (2008, 2010) models.  Defaults to 200.
 ;
+;  OPTIONAL KEYWORDS:
+;    silent - don't print anything, except errors
+;
 ;  OUTPUT:
 ;    Normalized N(M)
 ;
@@ -42,7 +45,7 @@ FUNCTION halo_mass_function, log_mhalo, redshift,$
                              omega_l=omega_l, $
                              spec_ind=spec_ind, $
                              model=model,power_spec=power_spec,$
-                             Delta=Delta
+                             Delta=Delta,silent=silent
 
 IF (n_elements(redshift) GT 1) THEN BEGIN
    print,'HALO_MASS FUNCTION: One redshift at a time please!'
@@ -66,7 +69,7 @@ omega_m_z=omega_m*((1.+redshift)^3.)/(E_z^2.)
 
 ;MAD Get sigma_m
 sig_m=sigma_m(log_mhalo,redshift,h0=h0,omega_m=omega_m,omega_b=omega_b,$
-                 omega_l=omega_l,spec_ind=spec_ind,power_spec=power_spec)
+                 omega_l=omega_l,spec_ind=spec_ind,power_spec=power_spec,silent=silent)
 
 ;MAD Use approximation of NFW 97 for delta (valid in universe with
 ;MAD Lambda, while Tinker delta_c=1.69 only for Omega_m=1)
@@ -136,7 +139,7 @@ rho_matter=rho_crit*omega_m
 mhalo=10.^(log_mhalo)
    
 d_sig_M=sigma_m(log_mhalo+0.001,redshift,h0=h0,omega_m=omega_m,omega_b=omega_b,$
-                 omega_l=omega_l,spec_ind=spec_ind,power_spec=power_spec)
+                 omega_l=omega_l,spec_ind=spec_ind,power_spec=power_spec,silent=silent)
 d_lognu=ALOG10(delta_c/d_sig_M)-ALOG10(nu)
 dlognu_dlogM=d_lognu/0.001
 
