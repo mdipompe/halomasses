@@ -93,7 +93,8 @@ ENDIF ELSE BEGIN
 ENDELSE
 
 mhalo=10.^log_mhalo
-rho_crit=2.7745d11
+IF (n_elements(z) GT 1) THEN rho_crit=rho_crit(0.,/phys) ELSE $
+   rho_crit=rho_crit(z,/phys)
 rho_mean=rho_crit*omega_m
 
 ;MAD Interpolate power spectrum to improve integration
