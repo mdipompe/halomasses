@@ -17,11 +17,6 @@
 ;               factor, which is slightly less accurate.
 ;
 ;  OPTIONAL INPUT:
-;    h0 - little h (H_0/100). Defaults to 0.702
-;    omega_m - omega_matter.  Defaults to 0.275
-;    omega_l - omega_lambda. Defaults to 0.725
-;    omega_b - omega_baryon. Defaults to 0.046
-;    spec_ind - power spectrum spectral index.  Defaults to 0.96
 ;    power_spec - string name of file with power spectrum.  Two
 ;                 columns, k (h/Mpc) and P(k) (h^-3 Mpc^3).
 ;                 If not supplied, runs camb with CAMB4IDL to get it.
@@ -42,13 +37,15 @@
 ;    
 ;  HISTORY:
 ;    8-27-15 - Written - MAD (UWyo)
+;    12-1-17 - Updated to use common block cosmological parameters
+;              from load_cosmology.pro
 ;-
 FUNCTION sigma_m, log_mhalo, redshift, $
-                  h0=h0, omega_m=omega_m, omega_b=omega_b, $
-                  omega_l=omega_l, spec_ind=spec_ind,$
                   power_spec=power_spec,maxk=maxk,$
                   paramfile=paramfile,silent=silent
-                  
+
+COMMON cosmological_parameters
+  
 IF (n_elements(redshift) GT 1) THEN BEGIN
    print,'SIGMA_M: Currently only supports single redshifts...I quit'
    print,'         (Note that you can just do z=0 and multiply by'
@@ -56,13 +53,6 @@ IF (n_elements(redshift) GT 1) THEN BEGIN
    print,'         approximation.)'
    return,'-1'
 ENDIF
-
-;MAD Set default cosmology
-IF ~keyword_set(h0) THEN h0=0.702
-IF ~keyword_set(omega_m) THEN omega_m=0.275
-IF ~keyword_set(omega_l) THEN omega_l=0.725
-IF ~keyword_set(omega_b) THEN omega_b=0.046
-IF ~keyword_set(spec_ind) THEN spec_ind=0.96
 
 IF ~keyword_set(power_spec) THEN BEGIN
    ;MAD setup redshifts and files for CAMB
@@ -83,7 +73,7 @@ IF ~keyword_set(power_spec) THEN BEGIN
                 transfer_redshift=redshift, $
                 transfer_filename=tfile, transfer_matterpower=mpfile, $
                 use_physical='F', $
-                hubble=h0*100., $
+                hubble=h*100., $
                 omega_baryon=omega_b, $
                 omega_cdm=omega_m-omega_b, $
                 omega_lambda=omega_l)
@@ -93,8 +83,8 @@ ENDIF ELSE BEGIN
 ENDELSE
 
 mhalo=10.^log_mhalo
-IF (n_elements(z) GT 1) THEN rho_crit=rho_crit(0.,/phys) ELSE $
-   rho_crit=rho_crit(z,/phys)
+IF (n_elements(redshift) GT 1) THEN rho_crit=rho_crit(0.,/phys) ELSE $
+   rho_crit=rho_crit(redshift,/phys)
 rho_mean=rho_crit*omega_m
 
 ;MAD Interpolate power spectrum to improve integration
