@@ -30,8 +30,8 @@ FUNCTION growth_factor,redshift
   COMMON cosmological_parameters
 
   ;MAD Evolve densities to z
-  omega_m_z=evolve_density(omega_m,redshift,type='matter')
-  omega_l_z=evolve_density(omega_l,redshift,type='lambda')
+  omega_m_z=evolve_density(redshift,type='matter')
+  omega_l_z=evolve_density(redshift,type='lambda')
 
   ;MAD Get growth factor (using Carroll et al. 1992 approx, 
   ;MAD accurate to ~1%.  Better than we know halo mass and bias usually)

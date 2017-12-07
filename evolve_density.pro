@@ -1,4 +1,4 @@
-FUNCTION evolve_density,omega,z,type=type
+FUNCTION evolve_density,z,type=type
 
   ;MAD Take current density parameters and adjust them to given z
   
