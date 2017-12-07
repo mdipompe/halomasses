@@ -83,8 +83,10 @@ ENDIF ELSE BEGIN
 ENDELSE
 
 mhalo=10.^log_mhalo
-IF (n_elements(redshift) GT 1) THEN rho_crit=rho_crit(0.,/phys) ELSE $
-   rho_crit=rho_crit(redshift,/phys)
+
+;MAD In comoving coords, mean matter density is constant with z,
+;so just get crit density at z=0 and multiply by current omega_m
+rho_crit=rho_crit(0.,/phys)
 rho_mean=rho_crit*omega_m
 
 ;MAD Interpolate power spectrum to improve integration

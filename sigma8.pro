@@ -14,18 +14,22 @@
 ;
 ;  OPTIONAL INPUT:
 ;    rho_crit - critical density (with h=1) Defaults to 2.7745d11
-;    omega_m - Omega_matter, defaults to 0.273
 ;
 ;  OUTPUT:
 ;    sigma8 - RMS mass fluctuations at radius 8 Mpc/h
 ;
 ;  HISTORY:
 ;    11-7-15 - Written - MAD (Dartmouth)
+;    12-6-17 - Updated to use common cosmological params from
+;              load_cosmology, and better handling of rho_crit
 ;-
-FUNCTION sigma8,power_spec,rho_crit=rho_crit,omega_m=omega_m
+FUNCTION sigma8,power_spec,rho_crit=rho_crit
 
-IF ~keyword_set(rho_crit) THEN rho_crit=2.7745d11
-IF ~keyword_set(omega_m) THEN omega_m=0.273
+COMMON cosmological_parameters
+
+;MAD In comoving coords, mean matter density is constant with z,
+;so just get crit density at z=0 and multiply by current omega_m
+IF ~keyword_set(rho_crit) THEN rho_crit=rho_crit(0,/phys)
 rho_mean=rho_crit*omega_m
 
 check=size(power_spec,/type)

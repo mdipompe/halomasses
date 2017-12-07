@@ -13,9 +13,6 @@
 ;    redshift - redshift(s).
 ;
 ;  OPTIONAL INPUT:
-;    h0 - little h (H_0/100). Defaults to 0.702
-;    omega_m - omega_matter.  Defaults to 0.275
-;    omega_l - omega_lambda. Defaults to 0.725
 ;
 ;  OUTPUT:
 ;    Growth factor at z.
@@ -26,18 +23,15 @@
 ;  HISTORY:
 ;    8-26-15 - Written - MAD (UWyo)
 ;    12-5-17 - Modified to use common block cosmological_parameters
-;              set in load_cosmology.pro
+;              set in load_cosmology.pro, evolve density functions
 ;-
 FUNCTION growth_factor,redshift
 
   COMMON cosmological_parameters
-  
-  ;MAD Set Hubble parameter scaling E(z)
-  E_z=sqrt((omega_m*(1.+redshift)^3.) + omega_l)
 
-  ;MAD Scale omega_m, omega_l with z
-  omega_m_z=omega_m*((1.+redshift)^3.)/(E_z^2.)
-  omega_l_z=omega_l/(E_z^2.)
+  ;MAD Evolve densities to z
+  omega_m_z=evolve_density(omega_m,redshift,type='matter')
+  omega_l_z=evolve_density(omega_l,redshift,type='lambda')
 
   ;MAD Get growth factor (using Carroll et al. 1992 approx, 
   ;MAD accurate to ~1%.  Better than we know halo mass and bias usually)
