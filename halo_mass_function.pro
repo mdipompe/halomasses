@@ -42,20 +42,14 @@ FUNCTION halo_mass_function, log_mhalo, redshift,$
 
 COMMON cosmological_parameters
   
-IF (n_elements(redshift) GT 1) THEN BEGIN
-   print,'HALO_MASS FUNCTION: One redshift at a time please!'
-   return,'-1'
-ENDIF
+IF (n_elements(redshift) GT 1) THEN message,'One redshift at a time please!'
 
 ;MAD Set default params
 IF ~keyword_set(model) THEN model='tinker10'
 IF ~keyword_set(Delta) THEN Delta=200.
 
-;MAD Set Hubble parameter scaling E(z)
-E_z=sqrt((omega_m*(1.+redshift)^3.) + omega_l)
-
 ;MAD Scale omega_m, omega_l with z
-omega_m_z=omega_m*((1.+redshift)^3.)/(E_z^2.)
+omega_m_z=evolve_density(redshift,type='matter')
 
 ;MAD Get sigma_m
 sig_m=sigma_m(log_mhalo,redshift,power_spec=power_spec,silent=silent)
