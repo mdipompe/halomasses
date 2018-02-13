@@ -1,4 +1,4 @@
-FUNCTION rho_crit,z,physical=physical
+FUNCTION rho_crit,z
 
   COMMON cosmological_parameters
 
@@ -12,7 +12,5 @@ FUNCTION rho_crit,z,physical=physical
   ;MAD Get rho_crit at z
   rho_crit=(3.*Hz^2.)/(8.*!dpi*G)
 
-  IF (n_elements(physical) NE 0) THEN rho_crit=rho_crit/((1.+z)^3.)
-  
   return,rho_crit
 END
