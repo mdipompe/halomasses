@@ -24,6 +24,7 @@
 ;
 ;  OPTIONAL KEYWORDS:
 ;    silent - don't print anything, except errors
+;    logM - set to return dN/dlogM (instead of dn/dM)
 ;
 ;  OUTPUT:
 ;    Normalized N(M)
@@ -38,7 +39,7 @@
 ;-
 FUNCTION halo_mass_function, log_mhalo, redshift,$
                              model=model,power_spec=power_spec,$
-                             Delta=Delta,silent=silent
+                             Delta=Delta,silent=silent,logM=logM
 
 COMMON cosmological_parameters
   
@@ -126,6 +127,8 @@ d_lognu=ALOG10(delta_c/d_sig_M)-ALOG10(nu)
 dlognu_dlogM=d_lognu/0.001
 
 n_mhalo=(nu*f*rho_matter*dlognu_dlogM)/(mhalo^2.)
+
+IF (n_elements(logM) NE 0) THEN n_mhalo=n_mhalo*(mhalo*alog(10))
 
 return,n_mhalo
 
