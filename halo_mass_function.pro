@@ -36,100 +36,107 @@
 ;    8-26-15 - Written - MAD (UWyo)
 ;   10-29-15 - Added Delta keyword - MAD (Dartmouth)
 ;    12-1-16 - Edited to use common block from load_cosmology
+;     3-4-18 - Added evolution of params with z in Tinker10 model
 ;-
 FUNCTION halo_mass_function, log_mhalo, redshift,$
                              model=model,power_spec=power_spec,$
                              Delta=Delta,silent=silent,logM=logM
 
-COMMON cosmological_parameters
+  COMMON cosmological_parameters
   
-IF (n_elements(redshift) GT 1) THEN message,'One redshift at a time please!'
+  IF (n_elements(redshift) GT 1) THEN message,'One redshift at a time please!'
 
-;MAD Set default params
-IF ~keyword_set(model) THEN model='tinker10'
-IF ~keyword_set(Delta) THEN Delta=200.
+  ;MAD Set default params
+  IF ~keyword_set(model) THEN model='tinker10'
+  IF ~keyword_set(Delta) THEN Delta=200.
 
-;MAD Scale omega_m, omega_l with z
-omega_m_z=evolve_density(redshift,type='matter')
+  ;MAD Scale omega_m, omega_l with z
+  omega_m_z=evolve_density(redshift,type='matter')
 
-;MAD Get sigma_m
-sig_m=sigma_m(log_mhalo,redshift,power_spec=power_spec,silent=silent)
+  ;MAD Get sigma_m
+  sig_m=sigma_m(log_mhalo,redshift,power_spec=power_spec,silent=silent)
 
-;MAD Use approximation of NFW 97 for delta (valid in universe with
-;MAD Lambda, while Tinker delta_c=1.69 only for Omega_m=1)
-delta_c=0.15*((12.*!dpi)^(2./3.))*((omega_m_z)^(0.0055))	
+  ;MAD Use approximation of NFW 97 for delta (valid in universe with
+  ;MAD Lambda, while Tinker delta_c=1.69 only for Omega_m=1)
+  delta_c=0.15*((12.*!dpi)^(2./3.))*((omega_m_z)^(0.0055))	
 
-nu=delta_c/sig_m
-
-IF (model EQ 'tinker10') THEN BEGIN
-   ;MAD Find fit params for Delta (interpolate Tinker et al. (2010) Table 4)
-   Deltas=[200.,300.,400.,600.,800.,1200.,1600.,2400.,3200.]
-   alphas=[0.368,0.363,0.385,0.389,0.393,0.365,0.379,0.355,0.327]
-   betas=[0.589,0.585,0.544,0.543,0.564,0.623,0.637,0.673,0.702]
-   gams=[0.864,0.922,0.987,1.09,1.20,1.34,1.50,1.68,1.81]
-   phis=[-0.729,-0.789,-0.910,-1.05,-1.20,-1.26,-1.45,-1.50,-1.49]
-   etas=[-0.243,-0.261,-0.261,-0.273,-0.278,-0.301,-0.301,-0.319,-0.336]
-   quadterp,deltas,alphas,delta,alpha
-   quadterp,deltas,betas,delta,beta
-   quadterp,deltas,gams,delta,gam
-   quadterp,deltas,phis,delta,phi
-   quadterp,deltas,etas,delta,eta
+  nu=delta_c/sig_m
+  
+  IF (model EQ 'tinker10') THEN BEGIN
+     ;MAD Find fit params for Delta (interpolate Tinker et al. (2010) Table 4)
+     Deltas=[200.,300.,400.,600.,800.,1200.,1600.,2400.,3200.]
+     alphas=[0.368,0.363,0.385,0.389,0.393,0.365,0.379,0.355,0.327]
+     betas=[0.589,0.585,0.544,0.543,0.564,0.623,0.637,0.673,0.702]
+     gams=[0.864,0.922,0.987,1.09,1.20,1.34,1.50,1.68,1.81]
+     phis=[-0.729,-0.789,-0.910,-1.05,-1.20,-1.26,-1.45,-1.50,-1.49]
+     etas=[-0.243,-0.261,-0.261,-0.273,-0.278,-0.301,-0.301,-0.319,-0.336]
+     quadterp,deltas,alphas,delta,alpha
+     quadterp,deltas,betas,delta,beta
+     quadterp,deltas,gams,delta,gam
+     quadterp,deltas,phis,delta,phi
+     quadterp,deltas,etas,delta,eta
+     
+     ;MAD Evolve params with redshift (Tinker 2010 Eq 9-12)
+     beta=beta*(1.+redshift)^(0.20)
+     phi=phi*(1.+redshift)^(-0.08)
+     eta=eta*(1.+redshift)^(0.27)
+     gam=gam*(1.+redshift)^(-0.01)
    
-   term1=1+((beta*nu)^((-2)*phi))
-   term2=nu^(2.*eta)
-   term3=EXP(((-1.)*gam*(nu^2.))/2.)
+     term1=1+((beta*nu)^((-2)*phi))
+     term2=nu^(2.*eta)
+     term3=EXP(((-1.)*gam*(nu^2.))/2.)
 
-   f=alpha*term1*term2*term3
-ENDIF
-IF (model EQ 'tinker08') THEN BEGIN
-   logalpha=-(0.75/alog10(Delta/75))^1.2
-   alpha=10.^logalpha
+     f=alpha*term1*term2*term3
+  ENDIF
+  IF (model EQ 'tinker08') THEN BEGIN
+     logalpha=-(0.75/alog10(Delta/75))^1.2
+     alpha=10.^logalpha
+     
+     abig0=0.186
+     asmall0=1.47
+     b0=2.57
+     c=1.19
+     
+     abig=abig0*(1.+redshift)^(-0.14)
+     asmall=asmall0*(1.+redshift)^(-0.06)
+     b=b0*(1.+redshift)^(-alpha)
+     
+     term1=abig
+     term2=(sig_m/b[0])^(-asmall[0])+1.
+     term3=exp(-c[0]/sig_m^2.)
+     
+     f=term1*term2*term3/nu
+  ENDIF
+  IF (model EQ 'smt') THEN BEGIN
+     A=0.3222
+     q=0.3
+     smalla=0.707
+     
+     nuprime=sqrt(smalla)*nu
+     
+     term1=(2.*A)/nu
+     term2=(1.+(1./(nuprime^(2.*q))))
+     term3=((nuprime^2.)/(2.*!dpi))^(1./2.)
+     term4=EXP((-1.)*(nuprime^2.)/2.)
+     
+     f=term1*term2*term3*term4
+  ENDIF
+  
+
+  ;MAD Get N(M) in physical units
+  rho_crit=rho_crit(redshift,/physical)
+  rho_matter=rho_crit*omega_m
+
+  mhalo=10.^(log_mhalo)
    
-   abig0=0.186
-   asmall0=1.47
-   b0=2.57
-   c=1.19
-   
-   abig=abig0*(1.+redshift)^(-0.14)
-   asmall=asmall0*(1.+redshift)^(-0.06)
-   b=b0*(1.+redshift)^(-alpha)
-   
-   term1=abig
-   term2=(sig_m/b[0])^(-asmall[0])+1.
-   term3=exp(-c[0]/sig_m^2.)
-   
-   f=term1*term2*term3/nu
-ENDIF
-IF (model EQ 'smt') THEN BEGIN
-   A=0.3222
-   q=0.3
-   smalla=0.707
-   
-   nuprime=sqrt(smalla)*nu
-   
-   term1=(2.*A)/nu
-   term2=(1.+(1./(nuprime^(2.*q))))
-   term3=((nuprime^2.)/(2.*!dpi))^(1./2.)
-   term4=EXP((-1.)*(nuprime^2.)/2.)
-
-   f=term1*term2*term3*term4
-ENDIF
-
-
-;MAD Get N(M) in physical units
-rho_crit=2.7745d11
-rho_matter=rho_crit*omega_m
-
-mhalo=10.^(log_mhalo)
-   
-d_sig_M=sigma_m(log_mhalo+0.001,redshift,power_spec=power_spec,silent=silent)
-d_lognu=ALOG10(delta_c/d_sig_M)-ALOG10(nu)
-dlognu_dlogM=d_lognu/0.001
-
-n_mhalo=(nu*f*rho_matter*dlognu_dlogM)/(mhalo^2.)
-
-IF (n_elements(logM) NE 0) THEN n_mhalo=n_mhalo*(mhalo*alog(10))
-
-return,n_mhalo
+  d_sig_M=sigma_m(log_mhalo+0.001,redshift,power_spec=power_spec,silent=silent)
+  d_lognu=ALOG10(delta_c/d_sig_M)-ALOG10(nu)
+  dlognu_dlogM=d_lognu/0.001
+  
+  n_mhalo=(nu*f*rho_matter*dlognu_dlogM)/(mhalo^2.)
+  
+  IF (n_elements(logM) NE 0) THEN n_mhalo=n_mhalo*(mhalo*alog(10))
+  
+  return,n_mhalo
 
 END
