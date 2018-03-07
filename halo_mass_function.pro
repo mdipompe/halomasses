@@ -77,10 +77,10 @@ FUNCTION halo_mass_function, log_mhalo, redshift,$
      quadterp,deltas,etas,delta,eta
      
      ;MAD Evolve params with redshift (Tinker 2010 Eq 9-12)
-     beta=beta*(1.+redshift)^(0.20)
-     phi=phi*(1.+redshift)^(-0.08)
-     eta=eta*(1.+redshift)^(0.27)
-     gam=gam*(1.+redshift)^(-0.01)
+;     beta=beta*(1.+redshift)^(0.20)
+;     phi=phi*(1.+redshift)^(-0.08)
+;     eta=eta*(1.+redshift)^(0.27)
+;     gam=gam*(1.+redshift)^(-0.01)
    
      term1=1+((beta*nu)^((-2)*phi))
      term2=nu^(2.*eta)
@@ -124,7 +124,7 @@ FUNCTION halo_mass_function, log_mhalo, redshift,$
   
 
   ;MAD Get N(M) in physical units
-  rho_crit=rho_crit(redshift,/physical)
+  rho_crit=rho_crit(0.,/physical)
   rho_matter=rho_crit*omega_m
 
   mhalo=10.^(log_mhalo)
