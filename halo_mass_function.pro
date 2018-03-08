@@ -70,22 +70,56 @@ FUNCTION halo_mass_function, log_mhalo, redshift,$
      gams=[0.864,0.922,0.987,1.09,1.20,1.34,1.50,1.68,1.81]
      phis=[-0.729,-0.789,-0.910,-1.05,-1.20,-1.26,-1.45,-1.50,-1.49]
      etas=[-0.243,-0.261,-0.261,-0.273,-0.278,-0.301,-0.301,-0.319,-0.336]
-     quadterp,deltas,alphas,delta,alpha
-     quadterp,deltas,betas,delta,beta
-     quadterp,deltas,gams,delta,gam
-     quadterp,deltas,phis,delta,phi
-     quadterp,deltas,etas,delta,eta
-     
+
+     beta=spline(deltas,betas,delta)
+     gam=spline(deltas,gams,delta)
+     phi=spline(deltas,phis,delta)
+     eta=spline(deltas,etas,delta)
+          
      ;MAD Evolve params with redshift (Tinker 2010 Eq 9-12)
-;     beta=beta*(1.+redshift)^(0.20)
-;     phi=phi*(1.+redshift)^(-0.08)
-;     eta=eta*(1.+redshift)^(0.27)
-;     gam=gam*(1.+redshift)^(-0.01)
-   
+     ;MAD but if z > 3, use z=3 params
+     IF (redshift GT 3) THEN z_use=3. ELSE z_use=redshift
+     beta=beta*(1.+z_use)^(0.20)
+     phi=phi*(1.+z_use)^(-0.08)
+     eta=eta*(1.+z_use)^(0.27)
+     gam=gam*(1.+z_use)^(-0.01)
+
+     ;MAD some conditions must be met for normalization to work
+     IF (gam LE 0.) THEN BEGIN
+        print,'Gamma must be > 0, setting to 0.001'
+        gam=1d-3
+     ENDIF
+     IF (eta LE -0.5) THEN BEGIN
+        print,'Eta must be > -0.5, setting to -0.499'
+        eta=-0.499
+     ENDIF
+     IF (eta-phi LE -0.5) THEN BEGIN
+        print,'eta-phi must be > -0.5, setting phi to eta+0.499'
+        phi=eta+0.499
+     ENDIF
+     IF (beta LE 0) THEN BEGIN
+        print,'beta must be > 0, setting to 0.001'
+        beta=1d-3
+     ENDIF
+
+     ;MAD Calculate normalization (this is hacked from the HMFcalc codes,
+     ;MAD I honestly don't know where it comes from...
+     ;https://github.com/steven-murray/hmf/blob/master/hmf/fitting_functions.py
+     xx=where(deltas EQ delta,cnt)
+     IF (cnt EQ 0. or redshift NE 0.) THEN BEGIN
+        term1=2.^(eta-phi-0.5)
+        term2=beta^(-2.*phi)
+        term3=gam^(-0.5-eta)
+        term4_1=(2.^phi)*(beta^(2.*phi))
+        term4_2=gamma(eta+0.5)
+        term4_3=(gam^phi)*gamma(0.5-eta-phi)
+        alpha=1./(term1*term2*term3*(term4_1*term4_2+term4_3))
+     ENDIF
+     
      term1=1+((beta*nu)^((-2)*phi))
      term2=nu^(2.*eta)
      term3=EXP(((-1.)*gam*(nu^2.))/2.)
-
+     
      f=alpha*term1*term2*term3
   ENDIF
   IF (model EQ 'tinker08') THEN BEGIN
