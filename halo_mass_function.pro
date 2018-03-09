@@ -112,9 +112,11 @@ FUNCTION halo_mass_function, log_mhalo, redshift,$
         term3=gam^(-0.5-eta)
         term4_1=(2.^phi)*(beta^(2.*phi))
         term4_2=gamma(eta+0.5)
-        term4_3=(gam^phi)*gamma(0.5-eta-phi)
+        term4_3=(gam^phi)*gamma(0.5+ta-phi)
         alpha=1./(term1*term2*term3*(term4_1*term4_2+term4_3))
-     ENDIF
+     ENDIF ELSE BEGIN
+        alpha=alphas[xx]
+     ENDELSE
      
      term1=1+((beta*nu)^((-2)*phi))
      term2=nu^(2.*eta)
@@ -123,13 +125,55 @@ FUNCTION halo_mass_function, log_mhalo, redshift,$
      f=alpha*term1*term2*term3
   ENDIF
   IF (model EQ 'tinker08') THEN BEGIN
+          abigs=[0.1858659,$
+            0.1995973,$
+            0.2115659,$
+            0.2184113,$
+            0.2480968,$
+            0.2546053,$
+            0.2600000,$
+            0.2600000,$
+            0.2600000]
+     
+     asmalls=[1.466904,$
+              1.521782,$
+              1.559186,$
+              1.614585,$
+              1.869936,$
+              2.128056,$
+              2.301275,$
+              2.529241,$
+              2.661983]
+     
+     bs=[2.571104,$
+         2.254217,$
+         2.048674,$
+         1.869559,$
+         1.588649,$
+         1.507134,$
+         1.464374,$
+         1.436827,$
+         1.405210]
+     
+     cs=[1.193958,$
+         1.270316,$
+         1.335191,$
+         1.446266,$
+         1.581345,$
+         1.795050,$
+         1.965613,$
+         2.237466,$
+         2.439729]
+     
+     deltas=[200, 300, 400, 600, 800, 1200, 1600, 2400, 3200.]
+     
+     abig0=spline(deltas,abigs,delta)
+     asmall0=spline(deltas,asmalls,delta)
+     b0=spline(deltas,bs,delta)
+     c=spline(deltas,cs,delta)
+
      logalpha=-(0.75/alog10(Delta/75))^1.2
      alpha=10.^logalpha
-     
-     abig0=0.186
-     asmall0=1.47
-     b0=2.57
-     c=1.19
      
      abig=abig0*(1.+redshift)^(-0.14)
      asmall=asmall0*(1.+redshift)^(-0.06)
