@@ -112,7 +112,7 @@ FUNCTION halo_mass_function, log_mhalo, redshift,$
         term3=gam^(-0.5-eta)
         term4_1=(2.^phi)*(beta^(2.*phi))
         term4_2=gamma(eta+0.5)
-        term4_3=(gam^phi)*gamma(0.5+ta-phi)
+        term4_3=(gam^phi)*gamma(0.5+eta-phi)
         alpha=1./(term1*term2*term3*(term4_1*term4_2+term4_3))
      ENDIF ELSE BEGIN
         alpha=alphas[xx]
