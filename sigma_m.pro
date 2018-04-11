@@ -106,7 +106,6 @@ FOR i=0L,n_elements(mhalo)-1 DO BEGIN
    sigm[i]=((1./(2.*(!dpi^2.)))*res)^(1./2.)
 ENDFOR
 
-
 ;MAD Check integral accuracy by normalizing to known sigma_8, then
 ;MAD integrating and seeing if you get that value back.
 ;IF keyword_set(check_acc) THEN BEGIN
